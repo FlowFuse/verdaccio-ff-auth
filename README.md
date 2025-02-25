@@ -4,6 +4,23 @@
 
 ---
 
+## configuration
+
+```
+auth:
+  ff-auth:
+    baseURL: https://forge.example.com
+    adminSecret: password
+packages:
+  '@*/*':
+    access: $authenticated
+```
+
+Where
+
+- baseURL is the URL of the FlowFuse installation
+- adminSecret is the "admin" users password. This user has access to all scopes.
+
 ## development
 
 See the [verdaccio contributing guide](https://github.com/verdaccio/verdaccio/blob/master/CONTRIBUTING.md) for instructions setting up your development environment.
