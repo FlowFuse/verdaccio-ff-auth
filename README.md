@@ -18,8 +18,8 @@ packages:
 
 Where
 
-- baseURL is the URL of the FlowFuse installation
-- adminSecret is the "admin" users password. This user has access to all scopes.
+- `baseURL` is the URL of the FlowFuse installation
+- `adminSecret` is the "admin" users password. This user has access to all scopes.
 
 ## development
 
