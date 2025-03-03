@@ -1,4 +1,4 @@
-import { getForbidden, getInternalError } from '@verdaccio/commons-api';
+import { getForbidden } from '@verdaccio/commons-api';
 import {
   AllowAccess,
   AuthAccessCallback,
