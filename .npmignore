@@ -1,2 +1,4 @@
 src/
 .eslintrc
+docker/
+kubernetes/
