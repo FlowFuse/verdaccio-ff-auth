@@ -1,4 +1,4 @@
-# verdaccio-ff-auth
+# verdaccio-flowfuse-auth
 
 > Custom FlowFuse Authentication
 
@@ -8,7 +8,7 @@
 
 ```
 auth:
-  ff-auth:
+  flowfuse-auth:
     baseURL: https://forge.example.com
     adminSecret: password
 packages:
@@ -35,3 +35,7 @@ Once you have completed that, use the following npm tasks.
   Run unit test
 
 For more information about any of these commands run `npm run ${task} -- --help`.
+
+## docker container
+
+`docker build -f docker/Dockerfile -t flowfuse/flowfuse-npm-registry .`
