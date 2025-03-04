@@ -24,7 +24,6 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
   private adminSecret: string;
 
   public constructor(config: CustomConfig, options: PluginOptions<CustomConfig>) {
-    console.log('loaded')
     this.logger = options.logger;
     this.baseURL = options.config.baseURL;
     this.adminSecret = options.config.adminSecret
