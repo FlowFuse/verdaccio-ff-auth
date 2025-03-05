@@ -1,4 +1,4 @@
-# verdaccio-flowfuse-auth
+# verdaccio-ff-auth
 
 > Custom FlowFuse Authentication
 
@@ -8,7 +8,7 @@
 
 ```
 auth:
-  flowfuse-auth:
+  ff-auth:
     baseURL: https://forge.example.com
     adminSecret: password
 packages:

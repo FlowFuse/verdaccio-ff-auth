@@ -16,26 +16,16 @@ data:
         access: $authenticated
     log: { type: stdout, format: pretty, level: http }
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: flowfuse-npm-registry
-spec:
-  resources:
-    requests:
-      storage: 1Gi
-  volumeMode: Filesystem
-  accessModes:
-    - ReadWriteOnce
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: flowfuse-npm-registry
 spec:
   selector:
     matchLabels:
       app: flowfuse-npm-registry
+  serviceName: flowfuse-npm-registry
+  replicas: 1
   template:
     metadata:
       labels:
@@ -62,13 +52,23 @@ spec:
       - name: storage
         persistentVolumeClaim:
           claimName: flowfuse-npm-registry
+  volumeClaimTemplates:
+  - metadata:
+      name: flowfuse-npm-registry
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      volumeMode: Filesystem
+      resources:
+        requests:
+          storage: 5Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: flowfuse-npm-registry
 spec:
-  type: ClusterIP
+  clusterIp: none
   selector:
     app: flowfuse-npm-registry
   ports:
