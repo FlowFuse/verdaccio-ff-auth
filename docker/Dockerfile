@@ -8,4 +8,4 @@ FROM verdaccio/verdaccio:6.0
 
 COPY --chown=$VERDACCIO_USER_UID:root --from=builder \
   /usr/src \
-  /usr/local/lib/node_modules/verdaccio-flowfuse-auth
+  /usr/local/lib/node_modules/verdaccio-ff-auth
