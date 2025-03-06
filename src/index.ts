@@ -1,4 +1,4 @@
-import { getForbidden, getInternalError } from '@verdaccio/commons-api';
+import { getForbidden } from '@verdaccio/commons-api';
 import {
   AllowAccess,
   AuthAccessCallback,
@@ -22,6 +22,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
   public logger: Logger;
   public baseURL: string;
   private adminSecret: string;
+
   public constructor(config: CustomConfig, options: PluginOptions<CustomConfig>) {
     this.logger = options.logger;
     this.baseURL = options.config.baseURL;
@@ -39,6 +40,8 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
     // FF_BASEURL/account/check/npm/:user
     // Authorization: Bearer :password
 
+    this.logger.info('authenticate')
+    this.logger.info({user, password: '', url: `${this.baseURL}/account/check/npm/${user}`}, '@{user}, @{password}, @{url}')
     if (user === 'admin' && password === this.adminSecret) {
       return cb(null, ['admin'])
     } else {
@@ -50,13 +53,18 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
       })
       .then(result => {
         if (result.status === 200) {
-          return cb(null, [user])
+          const groups = [user]
+          if (result.data?.write) {
+            groups.push('write')
+          }
+          return cb(null, groups)
         } else {
           return cb(getForbidden('not allowed'), false)
         }
       })
       .catch(err => {
         // console.log(`error: ${err}`)
+        this.logger.error({err}, '@{err.toString()}')
         return cb(getForbidden('not allowed'), false)
       })
     }
