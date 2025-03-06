@@ -79,17 +79,19 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
        cb(getInternalError("error, try again"), false);
     }
      */
-    const scopeMatcher = new RegExp('@(.+)/(.+)')
+    const scopeMatcher = new RegExp('@flowfuse-(.+)/(.+)')
     // console.log('allow_access',user, pkg)
-    if (user.name === 'admin') {
-      this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to access @{package}')
-      return cb(null, true)
-    }
-    if (scopeMatcher.test((pkg as AllowAccess).name)) {
-      const scope = scopeMatcher.exec((pkg as AllowAccess).name)
-      if (scope && scope[1] === user.name) {
-        this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to access @{package}')
+    if (user.name) {
+      if (user.name === 'admin') {
+        this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to access @{package}')
         return cb(null, true)
+      }
+      if (scopeMatcher.test((pkg as AllowAccess).name)) {
+        const scope = scopeMatcher.exec((pkg as AllowAccess).name)
+        if (scope && scope[1] === (user.name as string).split('@')[1]) {
+          this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to access @{package}')
+          return cb(null, true)
+        }
       }
     }
     
@@ -114,16 +116,18 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
     }
      */
     // console.log('allow_publish',user, pkg)
-    if (user.name === 'admin') {
-      this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to publish @{package}')
-      return cb(null, true)
-    }
-    const scopeMatcher = new RegExp('@(.+)/(.+)')
-    if (scopeMatcher.test((pkg as AllowAccess).name)) {
-      const scope = scopeMatcher.exec((pkg as AllowAccess).name)
-      if (scope && scope[1] === user.name) {
-        this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to publish @{package}')
+    if (user.name) {
+      if (user.name === 'admin') {
+        this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to publish @{package}')
         return cb(null, true)
+      }
+      const scopeMatcher = new RegExp('@flowfuse-(.+)/(.+)')
+      if (scopeMatcher.test((pkg as AllowAccess).name)) {
+        const scope = scopeMatcher.exec((pkg as AllowAccess).name)
+        if (scope && scope[1] === (user.name as string).split('@')[1]) {
+          this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to publish @{package}')
+          return cb(null, true)
+        }
       }
     }
     this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} not allowed to publish @{package}')
@@ -142,16 +146,18 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
     }
      */
     // console.log('allow_unpublish',user, pkg)
-    if (user.name === 'admin') {
-      this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to unpublish @{package}')
-      return cb(null, true)
-    }
-    const scopeMatcher = new RegExp('@(.+)/(.+)')
-    if (scopeMatcher.test((pkg as AllowAccess).name)) {
-      const scope = scopeMatcher.exec((pkg as AllowAccess).name)
-      if (scope && scope[1] === user.name) {
-        this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to unpublish @{package}')
+    if (user.name) {
+      if (user.name === 'admin') {
+        this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to unpublish @{package}')
         return cb(null, true)
+      }
+      const scopeMatcher = new RegExp('@flowfuse-(.+)/(.+)')
+      if (scopeMatcher.test((pkg as AllowAccess).name)) {
+        const scope = scopeMatcher.exec((pkg as AllowAccess).name)
+        if (scope && scope[1] === (user.name as string).split('@')[1]) {
+          this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to unpublish @{package}')
+          return cb(null, true)
+        }
       }
     }
     this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} not allowed to unpublish @{package}')
