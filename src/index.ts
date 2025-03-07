@@ -35,7 +35,6 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
    * @param cb callback function
    */
   public authenticate(user: string, password: string, cb: AuthCallback): void {
-
     // FF_BASEURL/account/check/npm/:user
     // Authorization: Bearer :password
 
@@ -50,13 +49,13 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
       })
       .then(result => {
         if (result.status === 200) {
-          return cb(null, [user])
+          return cb(null, result.data.teams)
         } else {
           return cb(getForbidden('not allowed'), false)
         }
       })
       .catch(err => {
-        // console.log(`error: ${err}`)
+        this.logger.error(`error: ${err}`)
         return cb(getForbidden('not allowed'), false)
       })
     }
@@ -69,27 +68,22 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
    * @param cb
    */
   public allow_access(user: RemoteUser, pkg: PackageAccess, cb: AuthAccessCallback): void {
-    /**
-     * This code is just an example for demostration purpose
-    if (user.name === this.foo && pkg?.access?.includes[user.name]) {
-      this.logger.debug({name: user.name}, 'your package has been granted for @{name}');
-      cb(null, true)
-    } else {
-      this.logger.error({name: user.name}, '@{name} is not allowed to access this package');
-       cb(getInternalError("error, try again"), false);
-    }
-     */
-    const scopeMatcher = new RegExp('@(.+)/(.+)')
+    const scopeMatcher = new RegExp('@flowfuse-(.+)/(.+)')
     // console.log('allow_access',user, pkg)
-    if (user.name === 'admin') {
-      this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to access @{package}')
-      return cb(null, true)
-    }
-    if (scopeMatcher.test((pkg as AllowAccess).name)) {
-      const scope = scopeMatcher.exec((pkg as AllowAccess).name)
-      if (scope && scope[1] === user.name) {
-        this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to access @{package}')
+    const teamsList = user.groups.map(t => t.split(':')[0])
+    if (user.name) {
+      if (user.name === 'admin') {
+        this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to access @{package}')
         return cb(null, true)
+      }
+      if (scopeMatcher.test((pkg as AllowAccess).name)) {
+        const scope = scopeMatcher.exec((pkg as AllowAccess).name)
+        for (const team of teamsList) {
+          if (scope && scope[1] === team) {
+            this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to access @{package}')
+            return cb(null, true)
+          }
+        }
       }
     }
     
@@ -103,27 +97,28 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
    * @param cb
    */
   public allow_publish(user: RemoteUser, pkg: PackageAccess, cb: AuthAccessCallback): void {
-    /**
-     * This code is just an example for demostration purpose
-    if (user.name === this.foo && pkg?.access?.includes[user.name]) {
-      this.logger.debug({name: user.name}, '@{name} has been granted to publish');
-      cb(null, true)
-    } else {
-      this.logger.error({name: user.name}, '@{name} is not allowed to publish this package');
-       cb(getInternalError("error, try again"), false);
-    }
-     */
     // console.log('allow_publish',user, pkg)
-    if (user.name === 'admin') {
-      this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to publish @{package}')
-      return cb(null, true)
-    }
-    const scopeMatcher = new RegExp('@(.+)/(.+)')
-    if (scopeMatcher.test((pkg as AllowAccess).name)) {
-      const scope = scopeMatcher.exec((pkg as AllowAccess).name)
-      if (scope && scope[1] === user.name) {
-        this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to publish @{package}')
+    const teamsList = user.groups.map(t => {
+      const parts = t.split(':')
+      return {
+        name: parts[0],
+        role: Number.parseInt(parts[1])
+      }
+    })
+    if (user.name) {
+      if (user.name === 'admin') {
+        this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to publish @{package}')
         return cb(null, true)
+      }
+      const scopeMatcher = new RegExp('@flowfuse-(.+)/(.+)')
+      if (scopeMatcher.test((pkg as AllowAccess).name)) {
+        const scope = scopeMatcher.exec((pkg as AllowAccess).name)
+        for (const team of teamsList) {
+          if (scope && scope[1] === team.name && team.role >= 30 ) {
+            this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to publish @{package}')
+            return cb(null, true)
+          }
+        }
       }
     }
     this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} not allowed to publish @{package}')
@@ -131,27 +126,28 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
   }
 
   public allow_unpublish(user: RemoteUser, pkg: PackageAccess, cb: AuthAccessCallback): void {
-    /**
-     * This code is just an example for demostration purpose
-    if (user.name === this.foo && pkg?.access?.includes[user.name]) {
-      this.logger.debug({name: user.name}, '@{name} has been granted to unpublish');
-      cb(null, true)
-    } else {
-      this.logger.error({name: user.name}, '@{name} is not allowed to publish this package');
-      cb(getInternalError("error, try again"), false);
-    }
-     */
     // console.log('allow_unpublish',user, pkg)
-    if (user.name === 'admin') {
-      this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to unpublish @{package}')
-      return cb(null, true)
-    }
-    const scopeMatcher = new RegExp('@(.+)/(.+)')
-    if (scopeMatcher.test((pkg as AllowAccess).name)) {
-      const scope = scopeMatcher.exec((pkg as AllowAccess).name)
-      if (scope && scope[1] === user.name) {
-        this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to unpublish @{package}')
+    const teamsList = user.groups.map(t => {
+      const parts = t.split(':')
+      return {
+        name: parts[0],
+        role: Number.parseInt(parts[1])
+      }
+    })
+    if (user.name) {
+      if (user.name === 'admin') {
+        this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to unpublish @{package}')
         return cb(null, true)
+      }
+      const scopeMatcher = new RegExp('@flowfuse-(.+)/(.+)')
+      if (scopeMatcher.test((pkg as AllowAccess).name)) {
+        const scope = scopeMatcher.exec((pkg as AllowAccess).name)
+        for (const team of teamsList) {
+          if (scope && scope[1] === team.name && team.role >= 30 ) {
+            this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to unpublish @{package}')
+            return cb(null, true)
+          }
+        }
       }
     }
     this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} not allowed to unpublish @{package}')
