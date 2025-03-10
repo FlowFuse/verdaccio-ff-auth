@@ -22,6 +22,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
   public logger: Logger;
   public baseURL: string;
   private adminSecret: string;
+  private passwords: object = {}
 
   public constructor(config: CustomConfig, options: PluginOptions<CustomConfig>) {
     this.logger = options.logger;
@@ -42,6 +43,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
     this.logger.info('authenticate')
     this.logger.info({user, password: '', url: `${this.baseURL}/account/check/npm/${user}`}, '@{user}, @{password}, @{url}')
     if (user === 'admin' && password === this.adminSecret) {
+      this.passwords[user] = [password]
       return cb(null, ['admin'])
     } else {
       axios.get(`${this.baseURL}/account/check/npm/${user}`, {
@@ -52,6 +54,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
       })
       .then(result => {
         if (result.status === 200) {
+          this.passwords[user] = [password]
           return cb(null, result.data.teams)
         } else {
           return cb(getForbidden('not allowed'), false)
@@ -100,7 +103,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
    * @param cb
    */
   public allow_publish(user: RemoteUser, pkg: PackageAccess, cb: AuthAccessCallback): void {
-    // console.log('allow_publish',user, pkg)
+    console.log('allow_publish',user, pkg)
     const teamsList = user.groups.map(t => {
       const parts = t.split(':')
       return {
@@ -119,6 +122,21 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
         for (const team of teamsList) {
           if (scope && scope[1] === team.name && team.role >= 30 ) {
             this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to publish @{package}')
+            axios.post(`${this.baseURL}/logging/team/${scope[1]}/audit`,
+              {
+                action: 'publish',
+                name: (pkg as AllowAccess).name,
+                version: (pkg as AllowAccess).version
+              },
+              {
+              headers: {
+                Authorization: `Bearer ${this.passwords[user.name]}`,
+                "User-Agent": `FlowFuse npm/1.0.0`
+              }
+            }).catch(err => {
+              // ignore failed log
+              console.log(err)
+            })
             return cb(null, true)
           }
         }
@@ -129,7 +147,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
   }
 
   public allow_unpublish(user: RemoteUser, pkg: PackageAccess, cb: AuthAccessCallback): void {
-    // console.log('allow_unpublish',user, pkg)
+    console.log('allow_unpublish',user, pkg)
     const teamsList = user.groups.map(t => {
       const parts = t.split(':')
       return {
@@ -148,6 +166,21 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
         for (const team of teamsList) {
           if (scope && scope[1] === team.name && team.role >= 30 ) {
             this.logger.info({name: user.name, package: (pkg as AllowAccess).name},'@{name} allowed to unpublish @{package}')
+            // axios.post(`${this.baseURL}/logging/team/${scope[1]}/audit`,
+            //   {
+            //     action: 'unpublish',
+            //     name: (pkg as AllowAccess).name,
+            //     version: (pkg as AllowAccess).version
+            //   },
+            //   {
+            //   headers: {
+            //     Authorization: `Bearer ${this.passwords[user.name]}`,
+            //     "User-Agent": `FlowFuse npm/1.0.0`
+            //   }
+            // }).catch(err => {
+            //   // ignore failed log
+            //   console.log(err)
+            // })
             return cb(null, true)
           }
         }
