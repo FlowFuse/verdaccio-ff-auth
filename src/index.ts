@@ -40,8 +40,8 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
     // FF_BASEURL/account/check/npm/:user
     // Authorization: Bearer :password
 
-    this.logger.info('authenticate')
-    this.logger.info({user, password: '', url: `${this.baseURL}/account/check/npm/${user}`}, '@{user}, @{password}, @{url}')
+    // this.logger.info('authenticate')
+    // this.logger.info({user, password: '', url: `${this.baseURL}/account/check/npm/${user}`}, '@{user}, @{password}, @{url}')
     if (user === 'admin' && password === this.adminSecret) {
       this.passwords[user] = [password]
       return cb(null, ['admin'])
