@@ -103,7 +103,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
    * @param cb
    */
   public allow_publish(user: RemoteUser, pkg: PackageAccess, cb: AuthAccessCallback): void {
-    console.log('allow_publish',user, pkg)
+    // console.log('allow_publish',user, pkg)
     const teamsList = user.groups.map(t => {
       const parts = t.split(':')
       return {
@@ -147,7 +147,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
   }
 
   public allow_unpublish(user: RemoteUser, pkg: PackageAccess, cb: AuthAccessCallback): void {
-    console.log('allow_unpublish',user, pkg)
+    // console.log('allow_unpublish',user, pkg)
     const teamsList = user.groups.map(t => {
       const parts = t.split(':')
       return {
