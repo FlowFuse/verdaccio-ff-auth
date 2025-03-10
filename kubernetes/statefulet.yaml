@@ -41,7 +41,7 @@ spec:
         ports:
         - containerPort: 4873
         volumeMounts:
-        - name: storage
+        - name: flowfuse-npm-registry-storage
           mountPath: /verdaccio/storage
         - name: config
           mountPath: /verdaccio/conf
@@ -49,12 +49,9 @@ spec:
       - name: config
         configMap:
           name: flowfuse-npm-registry
-      - name: storage
-        persistentVolumeClaim:
-          claimName: flowfuse-npm-registry
   volumeClaimTemplates:
   - metadata:
-      name: flowfuse-npm-registry
+      name: flowfuse-npm-registry-storage
     spec:
       accessModes:
       - ReadWriteOnce
@@ -68,7 +65,7 @@ kind: Service
 metadata:
   name: flowfuse-npm-registry
 spec:
-  clusterIp: none
+  clusterIP: None
   selector:
     app: flowfuse-npm-registry
   ports:
