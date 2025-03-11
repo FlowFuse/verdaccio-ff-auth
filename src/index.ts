@@ -22,12 +22,14 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
   public logger: Logger;
   public baseURL: string;
   private adminSecret: string;
+  private adminUser: string
   private passwords: object = {}
 
   public constructor(config: CustomConfig, options: PluginOptions<CustomConfig>) {
     this.logger = options.logger;
     this.baseURL = options.config.baseURL;
     this.adminSecret = options.config.adminSecret
+    this.adminUser = options.config.adminUser || 'admin'
     return this;
   }
   /**
@@ -42,7 +44,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
 
     // this.logger.info('authenticate')
     // this.logger.info({user, password: '', url: `${this.baseURL}/account/check/npm/${user}`}, '@{user}, @{password}, @{url}')
-    if (user === 'admin' && password === this.adminSecret) {
+    if (user === this.adminUser && password === this.adminSecret) {
       this.passwords[user] = [password]
       return cb(null, ['admin'])
     } else {
@@ -78,7 +80,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
     // console.log('allow_access',user, pkg)
     const teamsList = user.groups.map(t => t.split(':')[0])
     if (user.name) {
-      if (user.name === 'admin') {
+      if (user.name === this.adminUser) {
         this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to access @{package}')
         return cb(null, true)
       }
@@ -112,7 +114,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
       }
     })
     if (user.name) {
-      if (user.name === 'admin') {
+      if (user.name === this.adminUser) {
         this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to publish @{package}')
         return cb(null, true)
       }
@@ -156,7 +158,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
       }
     })
     if (user.name) {
-      if (user.name === 'admin') {
+      if (user.name === this.adminUser) {
         this.logger.info({package: (pkg as AllowAccess).name},'admin allowed to unpublish @{package}')
         return cb(null, true)
       }

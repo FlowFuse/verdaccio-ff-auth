@@ -10,6 +10,7 @@
 auth:
   ff-auth:
     baseURL: https://forge.example.com
+    adminUser: admin
     adminSecret: password
 packages:
   '@*/*':
@@ -19,7 +20,8 @@ packages:
 Where
 
 - `baseURL` is the URL of the FlowFuse installation
-- `adminSecret` is the "admin" users password. This user has access to all scopes.
+- `adminUser` is username of the system admin user.
+- `adminSecret` is the adminUser's password. This user has access to all scopes.
 
 ## development
 
@@ -38,4 +40,4 @@ For more information about any of these commands run `npm run ${task} -- --help`
 
 ## docker container
 
-`docker build -f docker/Dockerfile -t flowfuse/flowfuse-npm-registry .`
+`docker build -f docker/Dockerfile -t flowfuse/npm-registry .`

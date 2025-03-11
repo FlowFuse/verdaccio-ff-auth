@@ -10,6 +10,7 @@ data:
     auth:
       flowfuse-auth:
         baseURL: http://forge.default
+        adminUser: admin
         adminSecret: secret
     packages:
       '@*/*':
