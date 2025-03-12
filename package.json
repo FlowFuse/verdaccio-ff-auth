@@ -23,7 +23,7 @@
     "typescript": "4.7.4"
   },
   "keywords": [
-    "npm,flowfuse,verdaccio-]"
+    "npm,flowfuse,verdaccio"
   ],
   "license": "Apache-2.0",
   "repository": "flowfuse/vedaccio-ff-auth",
