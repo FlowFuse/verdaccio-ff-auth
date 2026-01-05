@@ -1,5 +1,5 @@
-import { Config } from '@verdaccio/types';
+import { Config } from '@verdaccio/types'
 
 export interface CustomConfig extends Config {
-  baseURL: string;
+    baseURL: string;
 }
