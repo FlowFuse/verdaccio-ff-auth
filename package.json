@@ -1,6 +1,6 @@
 {
   "name": "verdaccio-ff-auth",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Custom FlowFuse Authentication",
   "main": "lib/src/index.js",
   "types": "lib/src/index.d.ts",
