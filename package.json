@@ -12,7 +12,7 @@
     "axios": "^1.21.1"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^10.0.1",
     "@types/express": "4.17.13",
     "@types/jest": "27.5.1",
     "@types/node": "12.12.5",
