@@ -22,6 +22,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
     public baseURL: string
     private adminSecret: string
     private adminUser: string
+    private readonly adminGroup = 'ff:admin'
     private passwords: object = {}
 
     public constructor (config: CustomConfig, options: PluginOptions<CustomConfig>) {
@@ -46,7 +47,9 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
         // this.logger.info({user, password: '', url: `${this.baseURL}/account/check/npm/${user}`}, '@{user}, @{password}, @{url}')
         if (user === this.adminUser && password === this.adminSecret) {
             this.passwords[user] = [password]
-            return cb(null, ['admin'])
+            // The admin role is granted only here, where the secret is verified.
+            // The authorization hooks key off this group, not the login name.
+            return cb(null, ['admin', this.adminGroup])
         } else {
             axios.get(`${this.baseURL}/account/check/npm/${user}`, {
                 headers: {
@@ -80,7 +83,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
         // console.log('allow_access',user, pkg)
         const teamsList = user.groups.map(t => t.split(':')[0])
         if (user.name) {
-            if (user.name === this.adminUser) {
+            if ((user.real_groups || []).includes(this.adminGroup)) {
                 this.logger.info({ package: (pkg as AllowAccess).name }, 'admin allowed to access @{package}')
                 return cb(null, true)
             }
@@ -114,7 +117,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
             }
         })
         if (user.name) {
-            if (user.name === this.adminUser) {
+            if ((user.real_groups || []).includes(this.adminGroup)) {
                 this.logger.info({ package: (pkg as AllowAccess).name }, 'admin allowed to publish @{package}')
                 return cb(null, true)
             }
@@ -158,7 +161,7 @@ export default class AuthCustomPlugin implements IPluginAuth<CustomConfig> {
             }
         })
         if (user.name) {
-            if (user.name === this.adminUser) {
+            if ((user.real_groups || []).includes(this.adminGroup)) {
                 this.logger.info({ package: (pkg as AllowAccess).name }, 'admin allowed to unpublish @{package}')
                 return cb(null, true)
             }
